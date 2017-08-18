@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Net;
+using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -9,6 +12,8 @@ namespace Server_ah
 {
     class Program
     {
+
+        string ipAddress;
         static void Main(string[] args)
         {
 
@@ -16,6 +21,24 @@ namespace Server_ah
             p.run();
 
         }
+        public string GetIPAddress()
+        {
+
+            IPHostEntry Host = default(IPHostEntry);
+            string Hostname = null;
+            Hostname = System.Environment.MachineName;
+            Host = Dns.GetHostEntry(Hostname);
+            foreach (IPAddress IP in Host.AddressList)
+            {
+                if (IP.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)
+                {
+                    ipAddress = Convert.ToString(IP);
+                }
+            }
+            return ipAddress;
+
+        }
+
 
         private void run()
         {
@@ -23,94 +46,31 @@ namespace Server_ah
             bool correct = false;
             int loginchoice = 0;
 
+            TcpListener server = new TcpListener(IPAddress.Any, 20001);
+            server.Start();
 
-            Console.WriteLine("Velkommen til det bedste ah i verden.");
-            Console.WriteLine("Tast 1 for login");
-            Console.WriteLine("Tast 2 for oprettelse af bruger");
-            while (correct == false)
+            Socket client = server.AcceptSocket();
+            NetworkStream stream = new NetworkStream(client);
+            StreamReader sr = new StreamReader(stream);
+            StreamWriter sw = new StreamWriter(stream);
+            sw.AutoFlush = true;
+
+            ipAddress = GetIPAddress();
+
+            Console.WriteLine("Der er nu forbindelse til: " + ipAddress);
+
+            while(true)
             {
-                string log = Console.ReadKey().KeyChar.ToString();
-                correct = int.TryParse(log, out loginchoice);
-                if (correct)
-                {
-                    if (loginchoice == 1 || loginchoice == 2)
-                    {
-
-                    }
-                    else
-                        correct = false;
-                }
-                if (correct == false)
-                {
-                    Console.WriteLine("");
-                    Console.WriteLine("Forkert indtastning");
-                }
 
             }
 
-            while (loggedIn == false)
-            {
-                switch (loginchoice)
-                {
-                    case 1:
-                        bool succes = false;
-                        Console.WriteLine("Indtast brugernavn:");
-                        string username = Console.ReadLine();
-                        Console.Write("Indtasts kodeord:");
-                        string password = Console.ReadLine();
-
-
-                        if (succes)
-                        {
-                            loggedIn = true;
-                        }
-                        // Check for login
-
-
-                        break;
-                    case 2:
-                        Console.WriteLine("Indtast ønskede brugernavn:");
-                        string createUsername = Console.ReadLine();
-                        // Check for om brugernavn eksistere
-
-                        bool samePass = false;
-                        while (samePass == false)
-                        {
-                            Console.Write("Indtast kodeord:");
-                            string createPass1 = Console.ReadLine();
-                            Console.Write("Skriv kodeord igen:");
-                            string createPass2 = Console.ReadLine();
-
-                            if (createPass1 == createPass2)
-                            {
-                                string newSalt = login.GetRandomSalt();
-                                string hashPass = login.HashString(createPass1, newSalt);
-                                samePass = true;
-                                //Skriv til something
-                            }
-                            else
-                            {
-                                Console.WriteLine("Kodeord er ikke det samme!");
-                            }
-
-                        }
-                        Console.Clear();
-                        Console.WriteLine("Din bruger er nu oprettet");
-                        Console.WriteLine("Du bliver nu logged in...");
-                        Thread.Sleep(1000);
-                        Console.WriteLine("Logger in...");
-                        Thread.Sleep(1000);
-                        Console.WriteLine("Logger in...");
-                        Thread.Sleep(500);
-                        Console.WriteLine("Du er nu logged in som: " + createUsername);
-
-                        loggedIn = true;
-                        break;
-                }
-
-            }
-
+            sr.Close();
+            sw.Close();
+            client.Close();
 
         }
+
+
     }
 }
+
