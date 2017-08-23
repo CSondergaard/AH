@@ -14,6 +14,10 @@ namespace Client_ah
     {
         static int loginchoice = 0;
         static string brugernavn = "";
+        static TcpClient client;
+        static StreamReader sr;
+        static StreamWriter sw;
+        static NetworkStream stream;
 
         static void Main(string[] args)
         {
@@ -22,12 +26,32 @@ namespace Client_ah
         }
         public void run()
         {
-            TcpClient client = new TcpClient("localhost", 20001);
-            NetworkStream stream = client.GetStream();
-            StreamReader sr = new StreamReader(stream);
-            StreamWriter sw = new StreamWriter(stream);
-            sw.AutoFlush = true;
+            bool con = true;
+            while (con)
+            {
+                try
+                {
+                    client = new TcpClient("localhost", 20001);
+                    con = false;
+                }
+                catch
+                {
+                    con = true;
+                    Thread.Sleep(2000);
 
+                }
+
+
+            }
+
+
+
+
+
+            stream = client.GetStream();
+            sr = new StreamReader(stream);
+            sw = new StreamWriter(stream);
+            sw.AutoFlush = true;
 
             loginChoice();
 
@@ -184,6 +208,26 @@ namespace Client_ah
 
         private static void ShowItems()
         {
+
+            sw.Write("ShowItems");
+            while (true)
+            {
+                byte[] buffer = new byte[client.ReceiveBufferSize];
+                int byte_count = stream.Read(buffer, 0, client.ReceiveBufferSize);
+
+                if (byte_count == 0)
+                {
+                    break;
+                }
+
+                string data = Encoding.ASCII.GetString(buffer, 0, byte_count);
+                Console.WriteLine(data);
+            }
+
+            Console.WriteLine(sr.ReadLine());
+            Console.ReadLine();
+
+
         }
         private static void BidOnItems()
         {
@@ -192,7 +236,7 @@ namespace Client_ah
 
         private static void LogOut()
         {
-            
+
         }
 
 
