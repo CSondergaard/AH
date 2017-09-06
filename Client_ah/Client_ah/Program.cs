@@ -7,6 +7,7 @@ using System.Net;
 using System.IO;
 using System.Net.Sockets;
 using System.Threading;
+using System.Net.Http;
 
 namespace Client_ah
 {
@@ -158,9 +159,9 @@ namespace Client_ah
                 }
 
                 Console.WriteLine("Du bliver nu logged in...");
-                Thread.Sleep(1000);
+                Thread.Sleep(700);
                 Console.WriteLine("Logger in...");
-                Thread.Sleep(1000);
+                Thread.Sleep(1300);
                 Console.WriteLine("Logger in...");
                 Thread.Sleep(500);
                 Console.WriteLine("Du er nu logged in som: " + brugernavn);
@@ -236,7 +237,9 @@ namespace Client_ah
 
         private static void LogOut()
         {
-
+            string ip = Dns.GetHostEntry(Dns.GetHostName()).AddressList[1].ToString();
+            sw.WriteLine(ip + " " + "Disconnected");
+            Environment.Exit(0);
         }
 
 
